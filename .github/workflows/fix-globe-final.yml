@@ -1,0 +1,68 @@
+name: Fix WorldGuard Earth Globe
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-globe-final.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Replace blank sphere with real Earth texture
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('dashboard-v2.html')
+          s = p.read_text(encoding='utf-8')
+
+          # The live file currently contains globeImageUrl(null), which creates
+          # the plain blue sphere visible in the demo. Replace that exact chain
+          # with the official globe.gl Earth assets.
+          s = s.replace(
+              ".globeImageUrl(null).bumpImageUrl(null)",
+              ".globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg').bumpImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png').showGraticules(true).showAtmosphere(true).atmosphereColor('#2bdcff').atmosphereAltitude(0.12)"
+          )
+
+          # Also replace any older unpkg Earth texture references with the
+          # jsDelivr copies used by the official globe.gl examples.
+          s = s.replace(
+              'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg',
+              'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg'
+          )
+          s = s.replace(
+              'https://unpkg.com/three-globe/example/img/earth-night.jpg',
+              'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg'
+          )
+          s = s.replace(
+              'https://unpkg.com/three-globe/example/img/earth-topology.png',
+              'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png'
+          )
+
+          # Ensure the real canvas is visible and the synthetic fallback is hidden.
+          s = s.replace(
+              '<div id="globe" class="globeCanvas" style="display:none"></div>',
+              '<div id="globe" class="globeCanvas"></div>'
+          )
+          s = s.replace(
+              '.fallback-globe{display:block!important;',
+              '.fallback-globe{display:none!important;'
+          )
+
+          p.write_text(s, encoding='utf-8')
+
+      - name: Commit Earth globe fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dashboard-v2.html
+          git diff --cached --quiet || git commit -m 'Fix WorldGuard globe with real Earth texture'
+          git push
