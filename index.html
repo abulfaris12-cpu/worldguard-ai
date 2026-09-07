@@ -1,1 +1,23 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WorldGuard AI — Global Security Intelligence</title></head><body><script>location.href='dashboard.html';</script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WorldGuard AI — Global Security Intelligence</title><style id="worldguard-final-layout">
+@media (min-width:801px){
+  .app{height:100vh;overflow:hidden}
+  .layout{display:grid!important;grid-template-columns:205px minmax(0,1fr) 300px!important;grid-template-rows:340px 190px 1fr!important;min-height:0!important;overflow:hidden}
+  .maparea{grid-column:2!important;grid-row:1!important;height:340px!important;min-height:0!important}
+  .left{grid-column:1!important;grid-row:1 / span 2!important;max-height:none!important;overflow:auto!important}
+  .right{grid-column:3!important;grid-row:1 / span 2!important;max-height:none!important;overflow:auto!important}
+  .bottom{grid-column:2!important;grid-row:2 / span 2!important;height:auto!important;min-height:0!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:190px 1fr 1fr!important;overflow:hidden!important}
+  .bottom>section{min-width:0!important;min-height:0!important;overflow:hidden!important;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .bottom>section:nth-child(4n){border-right:0}
+  .bottom>section:nth-child(n+5){overflow:auto!important}
+  .bottom .heading{padding:8px 10px}
+  .bottom .news,.bottom .list{overflow:hidden!important}
+  .bottom .feature-card{height:100%!important;min-height:0!important;overflow:auto!important}
+}
+@media(max-width:800px){
+  .layout{display:flex!important;flex-direction:column!important;overflow:visible!important}
+  .maparea{order:1!important;height:210px!important;min-height:210px!important}
+  .left{order:2!important}.right{order:3!important}
+  .bottom{order:4!important;height:auto!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:auto!important;overflow:visible!important}
+  .bottom>section{min-height:145px!important;overflow:visible!important;border-right:0!important}
+}
+</style></head><body><script>location.href='dashboard.html';</script></body></html>
