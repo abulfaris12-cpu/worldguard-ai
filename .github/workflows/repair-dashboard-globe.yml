@@ -1,0 +1,80 @@
+name: Repair dashboard globe
+
+on:
+  push:
+    paths:
+      - '.github/workflows/repair-dashboard-globe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore visible command-center globe
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('dashboard-v2.html')
+          s = p.read_text(encoding='utf-8')
+
+          css = r'''
+          /* GUARANTEED VISIBLE WORLDGUARD GLOBE */
+          .fallback-globe{position:absolute;inset:0;z-index:2;overflow:hidden;background:radial-gradient(circle at 50% 48%,#092a3c 0,#041725 38%,#01080d 78%)}
+          .fallback-earth{position:absolute;width:min(54vw,610px);height:min(54vw,610px);min-width:430px;min-height:430px;left:50%;top:54%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 34% 28%,#15516e 0,#0b3852 27%,#06253a 52%,#020e19 78%,#01060b 100%);box-shadow:inset -70px -28px 95px #000d,inset 25px 15px 55px #2bdcff22,0 0 28px #1bb9ef55,0 0 85px #087bb533;overflow:hidden}
+          .fallback-earth:before{content:"";position:absolute;inset:-2%;border-radius:50%;background:repeating-linear-gradient(90deg,transparent 0 46px,#53d9ff2b 47px 48px),repeating-linear-gradient(0deg,transparent 0 46px,#53d9ff20 47px 48px);transform:rotate(-10deg) scale(1.2);opacity:.72}
+          .fallback-earth:after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 25%,transparent 0 38%,#0000 55%,#000b 86%,#000e 100%)}
+          .land{position:absolute;background:linear-gradient(135deg,#0b6062,#0b3f50);opacity:.9;box-shadow:0 0 12px #2bdcff22;filter:drop-shadow(0 0 3px #2bdcff22)}
+          .land.na{width:34%;height:25%;left:9%;top:22%;clip-path:polygon(0 18%,18% 3%,42% 10%,55% 25%,77% 23%,100% 48%,84% 61%,69% 55%,58% 77%,39% 67%,26% 91%,12% 69%,4% 46%)}
+          .land.sa{width:18%;height:34%;left:30%;top:48%;clip-path:polygon(31% 0,62% 10%,75% 28%,69% 43%,83% 55%,61% 75%,48% 100%,27% 82%,18% 58%,25% 35%,5% 20%)}
+          .land.eu{width:27%;height:19%;left:47%;top:23%;clip-path:polygon(2% 38%,15% 18%,31% 25%,43% 5%,59% 20%,77% 14%,99% 39%,82% 61%,63% 54%,48% 78%,28% 64%,14% 76%)}
+          .land.af{width:22%;height:34%;left:48%;top:40%;clip-path:polygon(35% 0,63% 9%,77% 25%,69% 41%,82% 56%,64% 76%,53% 100%,31% 84%,21% 64%,26% 47%,9% 30%)}
+          .land.asia{width:39%;height:27%;left:58%;top:22%;clip-path:polygon(0 30%,13% 9%,31% 17%,46% 3%,65% 12%,82% 8%,100% 35%,86% 53%,75% 48%,66% 72%,48% 58%,37% 77%,21% 60%,7% 69%)}
+          .land.oc{width:15%;height:9%;left:73%;top:70%;clip-path:polygon(4% 46%,22% 16%,48% 8%,73% 25%,96% 43%,79% 76%,52% 87%,25% 78%)}
+          .signal{position:absolute;width:9px;height:9px;border-radius:50%;z-index:6;box-shadow:0 0 0 5px #ff405d22,0 0 18px currentColor;background:currentColor;animation:signalPulse 1.8s infinite}
+          .signal.amber{color:#ffb52e;box-shadow:0 0 0 5px #ffb52e22,0 0 18px #ffb52e}
+          .signal.cyan{color:#2bdcff;box-shadow:0 0 0 5px #2bdcff22,0 0 18px #2bdcff}
+          .s-eu{left:57%;top:34%}.s-asia{left:74%;top:38%}.s-india{left:69%;top:48%}.s-us{left:28%;top:37%}.s-jp{left:82%;top:48%}.s-af{left:55%;top:54%}.s-sa{left:38%;top:63%}
+          .globe-region{position:absolute;z-index:7;padding:4px 7px;border:1px solid #255163;background:#041018dd;color:#d7e9ee;font-size:8px;letter-spacing:.4px}
+          .globe-region b{display:block;font-size:9px}.r-na{left:20%;top:30%}.r-eu{left:49%;top:26%}.r-as{left:67%;top:31%}.r-af{left:49%;top:54%}.r-sa{left:28%;top:61%}.r-oc{left:73%;top:70%}
+          @keyframes signalPulse{0%,100%{transform:scale(1);opacity:.95}50%{transform:scale(1.45);opacity:.6}}
+          .fallback-globe .orbit{position:absolute;left:50%;top:50%;width:78%;height:30%;border:1px solid #39cfff33;border-radius:50%;transform:translate(-50%,-50%) rotate(-18deg)}
+          .fallback-globe .orbit.two{width:58%;height:82%;transform:translate(-50%,-50%) rotate(22deg)}
+          @media(max-width:800px){.fallback-earth{width:360px;height:360px;min-width:360px;min-height:360px}.fallback-globe .globe-region{font-size:7px}.fallback-globe .signal{width:8px;height:8px}}
+          '''
+          marker = '</style>'
+          if 'GUARANTEED VISIBLE WORLDGUARD GLOBE' not in s:
+              s = s.replace(marker, css + '\n' + marker, 1)
+
+          old = '<div id="globe" class="globeCanvas"></div>'
+          new = '''<div id="globe" class="globeCanvas" style="display:none"></div>
+          <div class="fallback-globe" aria-label="WorldGuard global situation globe">
+            <div class="fallback-earth">
+              <div class="land na"></div><div class="land sa"></div><div class="land eu"></div><div class="land af"></div><div class="land asia"></div><div class="land oc"></div>
+              <span class="signal s-eu"></span><span class="signal s-asia"></span><span class="signal amber s-india"></span><span class="signal cyan s-us"></span><span class="signal s-jp"></span><span class="signal amber s-af"></span><span class="signal s-sa"></span>
+              <div class="orbit"></div><div class="orbit two"></div>
+            </div>
+            <div class="globe-region r-na"><b>N. AMERICA</b>2 Alerts</div>
+            <div class="globe-region r-eu"><b>EUROPE</b>4 Alerts</div>
+            <div class="globe-region r-as"><b>ASIA</b>6 Alerts</div>
+            <div class="globe-region r-af"><b>AFRICA</b>3 Alerts</div>
+            <div class="globe-region r-sa"><b>S. AMERICA</b>2 Alerts</div>
+            <div class="globe-region r-oc"><b>OCEANIA</b>1 Alert</div>
+          </div>'''
+          if old in s:
+              s = s.replace(old, new, 1)
+          else:
+              raise SystemExit('Expected globe element not found')
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit repair
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dashboard-v2.html
+          git diff --cached --quiet || git commit -m "Restore visible global situation globe"
+          git push
