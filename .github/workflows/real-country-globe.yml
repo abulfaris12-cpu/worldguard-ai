@@ -1,0 +1,62 @@
+name: Render real country globe
+
+on:
+  push:
+    paths:
+      - '.github/workflows/real-country-globe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add real country geometry
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('dashboard-v2.html')
+          s=p.read_text(encoding='utf-8')
+
+          # Do not depend on the Earth bitmap. Render real country geometries
+          # directly on the WebGL sphere from Natural Earth GeoJSON.
+          s=re.sub(
+            r"\.globeImageUrl\('https://unpkg\.com/three-globe/example/img/earth-blue-marble\.jpg'\)\.bumpImageUrl\('https://unpkg\.com/three-globe/example/img/earth-topology\.png'\)",
+            ".showGlobe(true).showGraticules(true)",
+            s,
+            count=1
+          )
+
+          marker="globe.controls().autoRotate=true;"
+          if "WORLDGUARD_REAL_COUNTRIES" not in s:
+            insert="""/* WORLDGUARD_REAL_COUNTRIES */
+fetch('https://cdn.jsdelivr.net/npm/three-globe/example/country-polygons/ne_110m_admin_0_countries.geojson')
+  .then(r=>r.json())
+  .then(world=>{
+    const countries=world.features.filter(f=>f.properties.ISO_A2!=='AQ');
+    globe
+      .polygonsData(countries)
+      .polygonGeoJsonGeometry('geometry')
+      .polygonAltitude(0.008)
+      .polygonCapColor(()=> 'rgba(24,104,128,0.92)')
+      .polygonSideColor(()=> 'rgba(8,38,50,0.75)')
+      .polygonStrokeColor(()=> 'rgba(70,190,220,0.42)')
+      .polygonLabel(({properties:d})=> `<b>${d.ADMIN||'Country'}</b><br>ISO: ${d.ISO_A2||'--'}`)
+      .polygonsTransitionDuration(350);
+  })
+  .catch(err=>console.warn('Country geometry failed to load',err));
+"""
+            s=s.replace(marker,insert+marker,1)
+
+          p.write_text(s,encoding='utf-8')
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dashboard-v2.html
+          git diff --cached --quiet || git commit -m 'Render real country boundaries on globe'
+          git push
