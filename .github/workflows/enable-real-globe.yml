@@ -16,7 +16,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Replace fallback with real interactive globe
+      - name: Build reliable real globe
         shell: python
         run: |
           from pathlib import Path
@@ -25,44 +25,45 @@ jobs:
           p = Path('dashboard-v2.html')
           s = p.read_text(encoding='utf-8')
 
-          # The current page already contains the globe.gl implementation and exact
-          # latitude/longitude signal data. Make that canvas the visible globe and
-          # hide only the temporary CSS fallback layer.
-          s = s.replace(
-              '<div id="globe" class="globeCanvas" style="display:none"></div>',
-              '<div id="globe" class="globeCanvas"></div>'
-          )
-          s = s.replace(
-              '.fallback-globe{position:absolute;inset:0;z-index:2;',
-              '.fallback-globe{display:none!important;position:absolute;inset:0;z-index:2;'
-          )
+          # Show the actual WebGL globe canvas, not the temporary visual fallback.
+          s = s.replace('<div id="globe" class="globeCanvas" style="display:none"></div>', '<div id="globe" class="globeCanvas"></div>')
+          s = s.replace('.fallback-globe{position:absolute;inset:0;z-index:2;', '.fallback-globe{display:none!important;position:absolute;inset:0;z-index:2;')
 
-          # Keep the real globe below HUD overlays but above the panel background.
-          marker = '.globeCanvas{position:absolute;inset:0}'
-          if marker in s and '.globeCanvas{position:absolute;inset:0;z-index:1}' not in s:
-              s = s.replace(marker, '.globeCanvas{position:absolute;inset:0;z-index:1}', 1)
+          # Use a pinned Globe.gl build with a compatible Three.js version.
+          s = s.replace('https://unpkg.com/three@0.160.0/build/three.min.js', 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js')
+          s = s.replace('https://unpkg.com/globe.gl', 'https://cdn.jsdelivr.net/npm/globe.gl@2.45.0/dist/globe.gl.min.js')
 
-          # Add a stronger, reliable Globe.gl canvas sizing rule.
-          css = '''\n/* REAL INTERACTIVE GLOBE */\n#globe{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:1!important}\n#globe canvas{display:block!important;width:100%!important;height:100%!important;touch-action:none!important;cursor:grab}\n#globe canvas:active{cursor:grabbing}\n'''
-          if '/* REAL INTERACTIVE GLOBE */' not in s:
+          # Remove dependence on an external Earth texture: the actual sphere remains
+          # a textured-looking, lit 3D Earth through Globe.gl's material and atmosphere.
+          s = s.replace(".globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg').bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')", ".globeMaterial(new THREE.MeshPhongMaterial({color:'#0b5270',emissive:'#03131c',shininess:18,transparent:false})).globeImageUrl(null).bumpImageUrl(null)")
+
+          # Ensure the canvas always receives its real panel dimensions after layout.
+          old_resize = "function resize(){const g=document.getElementById('globePanel');globe.width(g.clientWidth).height(g.clientHeight)}window.addEventListener('resize',resize);setTimeout(resize,100);"
+          new_resize = "function resize(){const g=document.getElementById('globePanel');if(!g)return;const w=Math.max(320,g.clientWidth),h=Math.max(320,g.clientHeight);globe.width(w).height(h);requestAnimationFrame(()=>globe.width(w).height(h))}window.addEventListener('resize',resize);setTimeout(resize,100);setTimeout(resize,500);setTimeout(resize,1500);"
+          s = s.replace(old_resize, new_resize)
+
+          # Add a small WebGL error guard so a failed CDN/WebGL context does not leave
+          # the panel silently empty.
+          guard = "window.addEventListener('error',e=>{if(String(e.message||'').toLowerCase().includes('globe'))console.warn('WorldGuard globe error',e.message)});"
+          if 'WorldGuard globe error' not in s:
+              s = s.replace('</script></body></html>', guard + '</script></body></html>')
+
+          # Make globe canvas sizing unambiguous.
+          css = "\n/* REAL 3D GLOBE - ACTIVE */\n#globe{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:1!important;display:block!important}\n#globe canvas{display:block!important;width:100%!important;height:100%!important;touch-action:none!important;cursor:grab!important}\n#globe canvas:active{cursor:grabbing!important}\n"
+          if '/* REAL 3D GLOBE - ACTIVE */' not in s:
               s = s.replace('</style>', css + '</style>', 1)
 
-          # Replace the signal definition with a richer set of precisely geocoded demo points.
+          # Replace the signal data with exact geographic demo coordinates.
           new_signals = "const signals=[{name:'Paris',lat:48.8566,lng:2.3522,c:'#ff405d',size:.62},{name:'London',lat:51.5074,lng:-.1278,c:'#ffb52e',size:.52},{name:'Kyiv',lat:50.4501,lng:30.5234,c:'#ff405d',size:.66},{name:'Tokyo',lat:35.6762,lng:139.6503,c:'#ff405d',size:.62},{name:'Mumbai',lat:19.076,lng:72.8777,c:'#ffb52e',size:.55},{name:'Singapore',lat:1.3521,lng:103.8198,c:'#00e89a',size:.46},{name:'New York',lat:40.7128,lng:-74.006,c:'#27d9ff',size:.48},{name:'San Francisco',lat:37.7749,lng:-122.4194,c:'#27d9ff',size:.45},{name:'Dubai',lat:25.2048,lng:55.2708,c:'#ffb52e',size:.5},{name:'Taipei',lat:25.033,lng:121.5654,c:'#ff405d',size:.58},{name:'Jakarta',lat:-6.2088,lng:106.8456,c:'#ffb52e',size:.5},{name:'São Paulo',lat:-23.5505,lng:-46.6333,c:'#ff405d',size:.58},{name:'Cairo',lat:30.0444,lng:31.2357,c:'#ffb52e',size:.48},{name:'Sydney',lat:-33.8688,lng:151.2093,c:'#00e89a',size:.43}];"
           s = re.sub(r"const signals=\[.*?\];const arcs=", new_signals + "const arcs=", s, count=1, flags=re.S)
 
-          # Make points clickable and show their real coordinates/name.
-          s = s.replace(
-              ".pointsMerge(false).labelsData(regions)",
-              ".pointsMerge(false).pointLabel(d=>`<b>${d.name}</b><br>LAT ${d.lat.toFixed(4)} · LON ${d.lng.toFixed(4)}`).labelsData(regions)"
-          )
-
+          s = s.replace(".pointsMerge(false).labelsData(regions)", ".pointsMerge(false).pointLabel(d=>`<b>${d.name}</b><br>LAT ${d.lat.toFixed(4)} · LON ${d.lng.toFixed(4)}`).labelsData(regions)")
           p.write_text(s, encoding='utf-8')
 
-      - name: Commit changes
+      - name: Commit
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add dashboard-v2.html
-          git diff --cached --quiet || git commit -m 'Restore real rotatable globe and exact location pins'
+          git diff --cached --quiet || git commit -m 'Fix real 3D globe rendering and exact geo pins'
           git push
