@@ -1,52 +1,10 @@
-name: Apply dashboard layout optimization
-
+name: Deprecated mobile workflow
 on:
-  push:
-    paths:
-      - '.github/workflows/mobile-optimize.yml'
   workflow_dispatch:
-
 permissions:
-  contents: write
-
+  contents: read
 jobs:
-  optimize-layout:
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Fix dashboard panel layout
-        shell: python
-        run: |
-          from pathlib import Path
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-
-          # Give the lower intelligence area enough vertical space for all cards.
-          s = s.replace('grid-template-rows:minmax(0,1fr) 250px', 'grid-template-rows:minmax(0,1fr) 450px')
-          s = s.replace('grid-auto-rows:minmax(145px,1fr);align-content:stretch', 'grid-auto-rows:minmax(145px,1fr);align-content:stretch')
-
-          # Keep the desktop feature cards compact and readable instead of stretching
-          # the original four panels into a large empty area.
-          css_marker = '/* WORLDGUARD PANEL LAYOUT FIX */'
-          css = r'''/* WORLDGUARD PANEL LAYOUT FIX */
-          .bottom{height:450px;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(3,minmax(145px,1fr));grid-auto-rows:auto;overflow:hidden}
-          .bottom>section{min-height:0;overflow:auto}
-          .feature-card{min-height:0;height:100%;overflow:auto}
-          .feature-body{min-height:0}
-          @media(max-width:800px){.layout{display:flex}.bottom{height:auto;grid-template-columns:1fr;grid-template-rows:auto;overflow:visible}.bottom>section{overflow:visible}.feature-card{height:auto;min-height:145px}}
-          '''
-          if css_marker not in s:
-              s = s.replace('</style>', css + '\n</style>', 1)
-
-          p.write_text(s, encoding='utf-8')
-      - name: Commit fixed dashboard
-        shell: bash
-        run: |
-          if git diff --quiet; then exit 0; fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html
-          git commit -m 'Fix intelligence panel layout and spacing'
-          git push
+      - run: echo "Deprecated - responsive layout is maintained directly in dashboard.html"
