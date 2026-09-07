@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WorldGuard AI — Apex Core</title>
+<style>
+:root{--bg:#07101d;--panel:#0d1929;--panel2:#101f32;--line:#1e334b;--text:#e8f0fa;--muted:#91a4bb;--cyan:#35c8ff;--green:#40e0a0;--amber:#ffbd5a;--red:#ff637d;--purple:#9b8cff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% -10%,#12345b 0,#07101d 42%);color:var(--text);font:14px Inter,Segoe UI,Arial,sans-serif}
+button,input{font:inherit}button{cursor:pointer}.app{display:flex;min-height:100vh}.side{width:235px;background:#081322;border-right:1px solid var(--line);padding:22px 14px;position:fixed;inset:0 auto 0 0}.brand{display:flex;gap:11px;align-items:center;margin:4px 8px 30px}.logo{width:38px;height:38px;border:1px solid #28618b;border-radius:11px;display:grid;place-items:center;color:var(--cyan);font-weight:800;background:#0b2135}.brand b{display:block}.brand small{color:var(--muted)}nav button{display:block;width:100%;border:0;background:transparent;color:#9eb0c5;text-align:left;padding:12px 13px;border-radius:9px;margin:4px 0}nav button.active,nav button:hover{background:#10273e;color:white}nav button span{margin-right:10px}.sidefoot{position:absolute;bottom:18px;left:22px;color:#71849a;font-size:12px}.main{margin-left:235px;width:calc(100% - 235px);padding:26px 30px 50px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.eyebrow{color:var(--cyan);letter-spacing:1.7px;font-size:11px;font-weight:700}.title{font-size:27px;font-weight:750;margin-top:4px}.topright{display:flex;gap:10px;align-items:center}.status{padding:8px 11px;border:1px solid #23513f;background:#0c241e;color:#62e4b0;border-radius:20px;font-size:12px}.btn{border:1px solid #2b5273;background:#12304a;color:#dcecff;padding:10px 14px;border-radius:9px}.btn.primary{background:linear-gradient(135deg,#168cc2,#2464d8);border-color:#37b9ef}.btn:hover{filter:brightness(1.15)}.finding .btn{background:linear-gradient(135deg,#168cc2,#2464d8);border-color:#37b9ef;color:#fff;min-width:92px;padding:9px 16px;text-align:center;white-space:nowrap}.finding .btn:hover{filter:brightness(1.15)}.grid{display:grid;gap:15px}.stats{grid-template-columns:repeat(4,1fr)}.card{background:linear-gradient(145deg,rgba(16,31,50,.98),rgba(10,23,38,.98));border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:0 14px 30px rgba(0,0,0,.15)}.stat .label{color:var(--muted);font-size:12px}.stat .num{font-size:29px;font-weight:750;margin:10px 0 5px}.delta{font-size:11px;color:var(--green)}.section{margin-top:16px}.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.sectionhead h2{font-size:15px;margin:0}.muted{color:var(--muted)}.cols{grid-template-columns:1.25fr .75fr}.finding{display:grid;grid-template-columns:8px minmax(0,1fr) auto auto;gap:13px;align-items:center;padding:14px 0;border-bottom:1px solid #172b40}.finding:last-child{border-bottom:0}.sev{height:38px;width:8px;border-radius:5px}.critical{background:var(--red)}.high{background:#ff8a5b}.medium{background:var(--amber)}.low{background:#68b8ff}.finding b{font-size:13px}.finding small{display:block;color:var(--muted);margin-top:4px}.pill{padding:5px 8px;border-radius:15px;font-size:11px;border:1px solid #2a4159;color:#b9cae0}.pill.red{color:#ff899b;border-color:#693544;background:#2b1720}.pill.green{color:#65e5b0;border-color:#2d5c4b;background:#11291f}.scorewrap{display:flex;align-items:center;gap:24px}.ring{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--cyan) 0 78%,#203348 78% 100%);position:relative}.ring:after{content:"";position:absolute;width:116px;height:116px;border-radius:50%;background:#0b1828}.ring span{position:relative;z-index:1;text-align:center}.ring strong{display:block;font-size:35px}.bars{margin-top:9px}.bar{margin:13px 0}.barline{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}.track{height:7px;background:#1a2c41;border-radius:10px;overflow:hidden}.fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#268cd0,#55d4ff)}.matrix{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.mcell{padding:13px 8px;text-align:center;border-radius:8px;border:1px solid #21384f}.mcell b{display:block;font-size:19px}.mcell small{color:var(--muted)}.workflow{display:flex;align-items:center;gap:0}.step{flex:1;text-align:center;position:relative}.step:after{content:"";height:2px;background:#284057;position:absolute;top:15px;left:60%;width:80%;z-index:0}.step:last-child:after{display:none}.dot{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;margin:0 auto 7px;background:#132a42;border:1px solid #315271;position:relative;z-index:1}.step.done .dot{background:#103a36;border-color:#35b890;color:#67e8bb}.step.active .dot{background:#103b59;border-color:var(--cyan);color:var(--cyan)}.step small{color:#9db0c7}.view{display:none}.view.active{display:block}.scan{padding:18px;border:1px dashed #2b5b7d;border-radius:12px;background:#0a1a2a}.scanrow{display:flex;justify-content:space-between;margin:10px 0}.progress{height:9px;background:#172c42;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;width:82%;background:linear-gradient(90deg,#1ba6df,#7a8cff);animation:pulse 2s infinite alternate}@keyframes pulse{to{filter:brightness(1.35)}}.terminal{background:#06101a;border:1px solid #1b3348;border-radius:10px;padding:14px;font:12px Consolas,monospace;color:#9fe8cb;line-height:1.7;min-height:150px}.report{line-height:1.6}.report h3{margin-bottom:5px}.report .box{background:#0a1827;border:1px solid #20384f;padding:13px;border-radius:9px;margin:9px 0}.modal{position:fixed;inset:0;background:#0009;display:none;place-items:center;padding:20px;z-index:10}.modal.show{display:grid}.modalbox{max-width:760px;width:100%;background:#0b1929;border:1px solid #31506c;border-radius:14px;padding:22px;max-height:90vh;overflow:auto}.close{float:right;background:transparent;border:0;color:#a8bbd0;font-size:22px}.tag{display:inline-block;padding:4px 8px;border-radius:5px;background:#112b40;color:#73d7ff;margin:3px;font-size:11px}
+@media(max-width:900px){.side{width:190px}.main{margin-left:190px;width:calc(100% - 190px)}.stats,.matrix{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}.workflow{overflow:auto}.step{min-width:120px}}
+@media(max-width:650px){.finding{grid-template-columns:8px minmax(0,1fr);}.finding .pill,.finding .btn{grid-column:2;width:max-content}.side{position:static;width:100%;height:auto}.app{display:block}.main{margin:0;width:100%;padding:18px}.sidefoot{position:static;margin-top:25px}.top{align-items:flex-start;gap:12px}.topright{flex-direction:column}.stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="brand"><div class="logo">WG</div><div><b>WORLDGUARD AI</b><small>Apex Core · SIH26163</small></div></div>
+  <nav>
+    <button class="active" data-view="overview">◈ <span>Security Overview</span></button>
+    <button data-view="discovery">⌁ <span>Asset Discovery</span></button>
+    <button data-view="findings">⚠ <span>Findings</span></button>
+    <button data-view="validation">✓ <span>PoC Validation</span></button>
+    <button data-view="remediation">↗ <span>Remediation</span></button>
+    <button data-view="reports">▤ <span>Reports</span></button>
+  </nav>
+  <div class="sidefoot">Continuous Assessment<br>● Prototype Environment</div>
+</aside>
+
+<main class="main">
+<div class="top">
+  <div><div class="eyebrow">SMART INDIA HACKATHON 2026</div><div class="title">Security Assessment of World Monitor</div><div class="muted">Automated discovery → validation → risk → remediation</div></div>
+  <div class="topright"><span class="status">● SYSTEM OPERATIONAL</span><button class="btn primary" onclick="startScan()">▶ Start Assessment</button></div>
+</div>
+
+<section id="overview" class="view active">
+  <div class="grid stats">
+    <div class="card stat"><div class="label">SECURITY SCORE</div><div class="num" id="score">78<span style="font-size:15px">/100</span></div><div class="delta">↑ +6 from last assessment</div></div>
+    <div class="card stat"><div class="label">ASSETS DISCOVERED</div><div class="num">24</div><div class="delta">↑ 3 new assets</div></div>
+    <div class="card stat"><div class="label">ACTIVE FINDINGS</div><div class="num">17</div><div class="delta" style="color:var(--amber)">4 high priority</div></div>
+    <div class="card stat"><div class="label">SCAN COVERAGE</div><div class="num">82<span style="font-size:15px">%</span></div><div class="delta">OWASP Top 10 + ASVS L1</div></div>
+  </div>
+
+  <div class="grid cols section">
+    <div class="card">
+      <div class="sectionhead"><h2>Assessment Workflow</h2><span class="pill green">ON DEMAND</span></div>
+      <div class="workflow">
+        <div class="step done"><div class="dot">✓</div><small>Discover</small></div>
+        <div class="step done"><div class="dot">✓</div><small>Scan</small></div>
+        <div class="step active"><div class="dot">●</div><small>AI Triage</small></div>
+        <div class="step"><div class="dot">4</div><small>Validate</small></div>
+        <div class="step"><div class="dot">5</div><small>Report</small></div>
+        <div class="step"><div class="dot">6</div><small>Re-test</small></div>
+      </div>
+      <div class="scan" style="margin-top:18px"><div class="scanrow"><b>Latest scan</b><span class="muted">worldmonitor.example</span></div><div class="progress"><i></i></div><div class="scanrow"><span class="muted">AI triage in progress</span><span>82%</span></div></div>
+    </div>
+    <div class="card"><div class="sectionhead"><h2>Risk Distribution</h2><span class="muted">17 findings</span></div><div class="matrix"><div class="mcell"><b style="color:var(--red)">2</b><small>Critical</small></div><div class="mcell"><b style="color:#ff8a5b">4</b><small>High</small></div><div class="mcell"><b style="color:var(--amber)">7</b><small>Medium</small></div><div class="mcell"><b style="color:#68b8ff">4</b><small>Low</small></div></div><div class="bars"><div class="bar"><div class="barline"><span>Access Control</span><span>6</span></div><div class="track"><div class="fill" style="width:76%"></div></div></div><div class="bar"><div class="barline"><span>Configuration</span><span>5</span></div><div class="track"><div class="fill" style="width:58%"></div></div></div><div class="bar"><div class="barline"><span>Authentication</span><span>4</span></div><div class="track"><div class="fill" style="width:47%"></div></div></div></div></div>
+  </div>
+
+  <div class="card section"><div class="sectionhead"><h2>Priority Findings</h2><button class="btn" onclick="showView('findings')">View all</button></div>
+    <div class="finding"><i class="sev critical"></i><div><b>IDOR — Broken Access Control</b><small>OWASP A01:2021 · API resource authorization</small></div><span class="pill red">7.5 HIGH</span><button class="btn primary" onclick="openFinding()">Review</button></div>
+    <div class="finding"><i class="sev high"></i><div><b>Object Authorization Gap</b><small>OWASP A01 · export endpoint</small></div><span class="pill red">7.1 HIGH</span></div>
+    <div class="finding"><i class="sev medium"></i><div><b>Missing Content-Security-Policy</b><small>Configuration · browser security controls</small></div><span class="pill">5.3 MED</span></div>
+  </div>
+</section>
+
+<section id="discovery" class="view">
+  <div class="grid stats"><div class="card stat"><div class="label">ASSETS</div><div class="num">24</div><div class="delta">3 new</div></div><div class="card stat"><div class="label">ENDPOINTS</div><div class="num">87</div><div class="delta">14 API groups</div></div><div class="card stat"><div class="label">SERVICES</div><div class="num">12</div><div class="delta">2 need review</div></div><div class="card stat"><div class="label">TECH STACK</div><div class="num">6</div><div class="delta">version fingerprints</div></div></div>
+  <div class="terminal" style="margin-top:15px">$ worldguard discover --target worldmonitor.example<br>✓ Crawling public routes... 87 endpoints found<br>✓ OpenAPI patterns detected... 14 API groups<br>✓ Subdomain enumeration... 9 assets<br>✓ Service fingerprinting... 12 exposed services<br>✓ Technology/version fingerprints queued for CVE correlation<br><b>Discovery complete.</b></div></div>
+</section>
+
+<section id="findings" class="view">
+  <div class="card"><div class="sectionhead"><h2>Findings & Risk Prioritization</h2><span class="muted">17 total · 4 high</span></div>
+  <div class="scan" style="margin-bottom:8px"><b>AI-prioritized finding</b><span class="muted"> · Review evidence before confirmation</span></div>
+  <div class="finding"><i class="sev critical"></i><div><b>IDOR — Broken Access Control</b><small>OWASP A01:2021 · API resource authorization · evidence attached</small></div><span class="pill red">7.5 HIGH</span><button class="btn primary" onclick="openFinding()">Review</button></div>
+  <div class="finding"><i class="sev high"></i><div><b>Object Authorization Gap</b><small>OWASP A01 · export endpoint · validation pending</small></div><span class="pill red">7.1 HIGH</span></div>
+  <div class="finding"><i class="sev high"></i><div><b>Exposed Administrative Route</b><small>Attack surface · access-control review</small></div><span class="pill">6.8 HIGH</span></div>
+  <div class="finding"><i class="sev high"></i><div><b>Weak API Authentication Flow</b><small>Authentication control · analyst review</small></div><span class="pill">6.5 HIGH</span></div>
+  <div class="finding"><i class="sev medium"></i><div><b>Missing Content-Security-Policy</b><small>Configuration · browser security controls</small></div><span class="pill">5.3 MED</span></div>
+  <div class="finding"><i class="sev low"></i><div><b>Verbose Error Information</b><small>Information disclosure · low business impact</small></div><span class="pill">3.7 LOW</span></div>
+  </div>
+</section>
+
+<section id="validation" class="view">
+  <div class="grid cols">
+    <div class="card"><div class="sectionhead"><h2>Analyst-in-the-Loop Validation</h2><span class="pill">SAFE SANDBOX</span></div><p class="muted">High-risk automated findings are reviewed and demonstrated only against an isolated test target.</p><div class="scan"><b>Selected finding: IDOR</b><p class="muted">Resource authorization appears absent when an adjacent test resource identifier is supplied.</p><div class="finding"><i class="sev high"></i><div><b>Automated Detection</b><small>Scanner signal + behavioral anomaly</small></div><span class="pill green">PASSED</span></div><div class="finding"><i class="sev high"></i><div><b>Analyst Validation</b><small>Evidence reviewed by analyst</small></div><span class="pill green">PASSED</span></div><div class="finding"><i class="sev high"></i><div><b>Controlled PoC</b><small>Isolated Docker sandbox · no production data</small></div><span class="pill green">CONFIRMED</span></div><button class="btn primary" onclick="openFinding()">View evidence</button></div></div>
+    <div class="card"><div class="sectionhead"><h2>Evidence Chain</h2><span class="pill green">AUDIT READY</span></div><div class="terminal">[09:31:02] Finding created<br>[09:31:04] Request pattern captured<br>[09:31:08] Authorization anomaly correlated<br>[09:31:12] Analyst review completed<br>[09:31:17] Sandbox validation completed<br>[09:31:20] CVSS assigned: 7.5<br>[09:31:22] Evidence hash recorded</div></div>
+  </div>
+</section>
+
+<section id="remediation" class="view">
+  <div class="grid cols"><div class="card"><div class="sectionhead"><h2>AI-Assisted Remediation</h2><span class="pill green">94% confidence</span></div><h3>Broken Access Control / IDOR</h3><p class="muted">Server-side authorization + verification</p><div class="report"><div class="box"><b>Recommendation</b><br>Enforce object-level authorization checks on every resource request. Avoid trusting client-supplied resource ownership.</div><div class="box"><b>Regression test</b><br>Verify that a low-privilege test account cannot access another test user's resource.</div><div class="box"><b>Verification</b><br>Schedule an automated re-test after remediation and retain the evidence chain.</div></div></div><div class="card"><h2 style="font-size:15px">Fix Closure</h2><p class="muted">Track remediation from open → fixed → re-tested.</p><div class="finding"><i class="sev high"></i><div><b>IDOR</b><small>Awaiting developer fix</small></div><span class="pill">OPEN</span></div><div class="finding"><i class="sev medium"></i><div><b>Headers</b><small>Recommendation delivered</small></div><span class="pill green">FIXED</span></div><div class="finding"><i class="sev low"></i><div><b>Error disclosure</b><small>Queued for re-test</small></div><span class="pill">RETEST</span></div></div></div>
+</section>
+
+<section id="reports" class="view">
+  <div class="card"><div class="sectionhead"><h2>Security Reports</h2><button class="btn primary" onclick="generateReport()">Generate Executive + Technical Report</button></div><div class="grid cols"><div class="report"><h3>Executive Report</h3><div class="box"><b>Overall score: 78/100 · MEDIUM</b><br>17 findings across 24 discovered assets. Four findings require high-priority analyst review.</div><div class="box"><b>Top business risk</b><br>Broken access control may expose monitoring/report data between users if object-level authorization is not enforced.</div></div><div class="report"><h3>Technical Report</h3><div class="box"><b>IDOR · CVSS v3.1 7.5</b><br>Evidence → validation → controlled PoC → remediation → re-test.</div><div class="box"><b>Standards</b><br>OWASP Top 10 · ASVS L1 · WSTG · CVSS v3.1</div></div></div></div>
+</section>
+</main>
+</div>
+
+<div class="modal" id="modal"><div class="modalbox"><button class="close" onclick="closeModal()">×</button><div class="eyebrow">CONFIRMED FINDING</div><h2>IDOR — Broken Access Control</h2><p class="muted">OWASP A01:2021 · CVSS v3.1: 7.5 · AI confidence: 96%</p><div class="box" style="background:#0a1827;border:1px solid #20384f;padding:14px;border-radius:9px"><b>Impact</b><p>Confidentiality and integrity risk. A low-privilege test account may access another test resource when object-level authorization is missing.</p></div><div class="box" style="background:#0a1827;border:1px solid #20384f;padding:14px;border-radius:9px"><b>Validation evidence</b><p>Detection → analyst review → isolated sandbox validation → evidence captured. No production data is used in this prototype.</p></div><div class="box" style="background:#0a1827;border:1px solid #20384f;padding:14px;border-radius:9px"><b>Recommended fix</b><p>Enforce server-side object-level authorization on every resource request and add an automated regression test.</p></div><button class="btn primary" onclick="generateReport()">Generate report</button></div></div>
+
+<script>
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+function openFinding(){document.getElementById('modal').classList.add('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function startScan(){showView('overview');const p=document.querySelector('.progress i');p.style.width='4%';let n=4;const timer=setInterval(()=>{n+=12;p.style.width=Math.min(n,100)+'%';if(n>=100){clearInterval(timer);p.style.width='100%';document.querySelector('.scanrow span.muted').textContent='Assessment completed · AI triage ready';}},180)}
+function generateReport(){const w=window.open('','_blank');w.document.write('<html><head><title>WorldGuard AI Security Report</title><style>body{font:14px Arial;max-width:850px;margin:40px auto;color:#172235}h1{margin-bottom:3px}.box{border:1px solid #ccd5df;padding:15px;border-radius:8px;margin:12px 0}table{width:100%;border-collapse:collapse}td,th{border:1px solid #ccd5df;padding:9px;text-align:left}</style></head><body>');w.document.write('<h1>WorldGuard AI — Security Assessment Report</h1><p>Apex Core · SIH26163 · Prototype Environment</p><div class="box"><h2>Executive Summary</h2><b>Security Score: 78/100 — MEDIUM</b><p>24 assets discovered, 87 endpoints, 17 findings. Four high-priority findings require analyst validation.</p></div>');w.document.write('<h2>Top Finding</h2><div class="box"><b>IDOR / Broken Access Control</b><p>OWASP A01:2021 · CVSS v3.1 7.5 · AI confidence 96%</p><p>Impact: confidentiality and integrity risk in the test environment.</p><p>Validation: automated detection, analyst review and controlled sandbox validation.</p></div>');w.document.write('<h2>Remediation</h2><div class="box">Enforce server-side object-level authorization for every resource request and add regression tests. Schedule a re-test after the fix.</div><h2>Methodology</h2><p>Discovery → automated assessment → AI triage → analyst validation → controlled PoC → CVSS risk scoring → remediation → re-test.</p>');w.document.write('<p style="margin-top:40px;color:#667">Generated by WorldGuard AI · Apex Core</p></body></html>');w.document.close();w.focus();}
+</script>
+</body>
+</html>
