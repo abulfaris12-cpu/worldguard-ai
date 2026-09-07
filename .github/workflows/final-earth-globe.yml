@@ -1,0 +1,104 @@
+name: Final real Earth globe
+
+on:
+  push:
+    paths:
+      - '.github/workflows/final-earth-globe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install real Earth globe
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('dashboard-v2.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Keep the real WebGL globe visible and hide the temporary CSS globe.
+          s = s.replace(
+              '<div id="globe" class="globeCanvas" style="display:none"></div>',
+              '<div id="globe" class="globeCanvas"></div>'
+          )
+          s = re.sub(
+              r'\.fallback-globe\{[^}]*position:absolute;',
+              '.fallback-globe{display:none!important;position:absolute;',
+              s,
+              count=1
+          )
+
+          # Use the real Earth imagery shipped by three-globe, via jsDelivr.
+          earth = """.globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/img/earth-night.jpg')
+  .bumpImageUrl('https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/img/earth-topology.png')
+  .showGlobe(true)
+  .showGraticules(true)
+  .showAtmosphere(true)
+  .atmosphereColor('#2bdcff')
+  .atmosphereAltitude(0.12)"""
+
+          # Replace any previous null/material Earth setup.
+          s = re.sub(
+              r"\.globeMaterial\(new THREE\.MeshPhongMaterial\(\{color:'#0b5270',emissive:'#03131c',shininess:18,transparent:false\}\)\)\.globeImageUrl\(null\)\.bumpImageUrl\(null\)",
+              earth,
+              s,
+              count=1
+          )
+
+          # Also repair an older showGlobe-only setup if present.
+          s = re.sub(
+              r"\.showGlobe\(true\)\.showGraticules\(true\)(?!\s*\.showAtmosphere)",
+              earth,
+              s,
+              count=1
+          )
+
+          # Add actual country boundaries from the Natural Earth dataset used by globe.gl.
+          marker = "globe.controls().autoRotate=true;"
+          block = """/* WORLDGUARD_FINAL_REAL_COUNTRIES */
+fetch('https://cdn.jsdelivr.net/npm/three-globe@2.45.0/example/datasets/ne_110m_admin_0_countries.geojson')
+  .then(r => { if (!r.ok) throw new Error('Country data HTTP ' + r.status); return r.json(); })
+  .then(world => {
+    const countries = (world.features || []).filter(f => f.properties && f.properties.ISO_A2 !== 'AQ');
+    globe
+      .polygonsData(countries)
+      .polygonGeoJsonGeometry('geometry')
+      .polygonAltitude(0.006)
+      .polygonCapColor(() => 'rgba(30,105,128,0.28)')
+      .polygonSideColor(() => 'rgba(4,24,34,0.55)')
+      .polygonStrokeColor(() => 'rgba(70,205,235,0.72)')
+      .polygonLabel(({properties:d}) => `<b>${d.ADMIN || 'Country'}</b><br>ISO: ${d.ISO_A2 || '--'}`)
+      .polygonsTransitionDuration(400);
+  })
+  .catch(err => console.warn('WorldGuard country geometry:', err));
+"""
+          if 'WORLDGUARD_FINAL_REAL_COUNTRIES' not in s:
+              s = s.replace(marker, block + marker, 1)
+
+          # Guarantee the WebGL canvas fills the map panel.
+          css = """
+/* FINAL REAL EARTH GLOBE */
+#globe,.globeCanvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:2!important;display:block!important}
+#globe canvas{display:block!important;width:100%!important;height:100%!important;touch-action:none!important;cursor:grab!important}
+#globe canvas:active{cursor:grabbing!important}
+"""
+          if '/* FINAL REAL EARTH GLOBE */' not in s:
+              s = s.replace('</style>', css + '</style>', 1)
+
+          p.write_text(s, encoding='utf-8')
+
+      - name: Commit final globe
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dashboard-v2.html
+          git diff --cached --quiet || git commit -m 'Install final real Earth globe with country boundaries'
+          git push
