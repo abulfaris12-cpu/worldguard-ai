@@ -1,0 +1,58 @@
+name: Force real Earth globe
+
+on:
+  push:
+    paths:
+      - '.github/workflows/force-real-earth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Force real Earth texture
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('dashboard-v2.html')
+          s=p.read_text(encoding='utf-8')
+
+          # Remove the synthetic polygon globe layer. Use the actual Earth
+          # equirectangular texture supplied by the globe.gl project instead.
+          s=re.sub(r'/\* WORLDGUARD_REAL_COUNTRIES \*/.*?\.catch\(err=>console\.warn\(\'Country geometry failed to load\',err\)\);', '', s, flags=re.S)
+
+          texture=""".globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
+  .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+  .showGlobe(true)
+  .showGraticules(true)
+  .showAtmosphere(true)
+  .atmosphereColor('#2bdcff')
+  .atmosphereAltitude(0.12)"""
+
+          s=re.sub(r"\.showGlobe\(true\)\.showGraticules\(true\)", texture, s, count=1)
+
+          # If a previous workflow left a hidden real canvas, make it visible.
+          s=s.replace('<div id="globe" class="globeCanvas" style="display:none">', '<div id="globe" class="globeCanvas">')
+          s=s.replace('.fallback-globe{display:block!important;', '.fallback-globe{display:none!important;')
+          s=s.replace('.fallback-globe{display:none!important;position:absolute;', '.fallback-globe{display:none!important;position:absolute;', 1)
+
+          # Make the WebGL canvas fill the globe panel.
+          css="""
+          /* REAL EARTH OVERRIDE */
+          #globe,.globeCanvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:2!important}
+          #globe canvas{width:100%!important;height:100%!important;display:block!important}
+          """
+          s=s.replace('</style>', css+'</style>', 1)
+          p.write_text(s,encoding='utf-8')
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dashboard-v2.html
+          git diff --cached --quiet || git commit -m 'Use real Earth texture for global situation globe'
+          git push
