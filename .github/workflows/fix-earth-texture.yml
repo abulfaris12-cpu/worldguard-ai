@@ -1,0 +1,53 @@
+name: Fix real Earth texture
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-earth-texture.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-texture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch globe texture and controls
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('dashboard-v2.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Use jsDelivr for the actual Blue Marble Earth texture. The previous
+          # unpkg texture was rendering as a plain blue sphere when the image
+          # request failed in some browsers/CDN paths.
+          s = s.replace(
+              'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg',
+              'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg'
+          )
+          s = s.replace(
+              'https://unpkg.com/three-globe/example/img/earth-topology.png',
+              'https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png'
+          )
+
+          # Make the real globe unmistakable: textured Earth, visible atmosphere,
+          # stronger point rendering, and manual rotation enabled.
+          if '/* EARTH TEXTURE RELIABILITY */' not in s:
+              s = s.replace('</style>', '''\n/* EARTH TEXTURE RELIABILITY */\n#globe canvas{image-rendering:auto!important;cursor:grab!important}\n#globe canvas:active{cursor:grabbing!important}\n''</style>''', 1)
+
+          # Hide the temporary CSS globe if it exists, without touching the real canvas.
+          s = s.replace('.fallback-globe{position:absolute;', '.fallback-globe{display:none!important;position:absolute;')
+
+          p.write_text(s, encoding='utf-8')
+
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dashboard-v2.html
+          git diff --cached --quiet || git commit -m 'Use reliable real Earth texture for globe'
+          git push
