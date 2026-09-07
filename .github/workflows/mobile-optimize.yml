@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Force compact map dimensions
+      - name: Compact map and add intelligence panels
         shell: python
         run: |
           from pathlib import Path
@@ -27,13 +27,43 @@ jobs:
           s = s.replace('.bottom{min-height:245px}', '.bottom{min-height:300px}')
           s = s.replace('.maparea,.map{height:285px;min-height:285px}', '.maparea,.map{height:240px;min-height:240px}')
           s = s.replace('.maparea,.map{height:240px;min-height:240px}', '.maparea,.map{height:210px;min-height:210px}')
+          css_marker = '/* WORLDGUARD INTELLIGENCE GRID */'
+          html_marker = '<!-- WORLDGUARD INTELLIGENCE FEATURES -->'
+          css = r'''/* WORLDGUARD INTELLIGENCE GRID */
+          .bottom{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(145px,1fr);align-content:stretch}
+          .feature-card{background:#080c10;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0;overflow:hidden}
+          .feature-head{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border-bottom:1px solid #202830;color:#9ba6ae;font-size:9px;letter-spacing:1px;text-transform:uppercase}
+          .feature-head em{font-style:normal;color:var(--green);font-size:8px;border:1px solid #285641;padding:3px 5px;background:#0a1712}
+          .feature-body{padding:9px 10px;color:#aeb7bd}.feature-title{font-size:10px;font-weight:700;color:#e1e6ea;line-height:1.35;margin-bottom:6px}.feature-muted{font-size:8px;color:#6d7982;line-height:1.45}
+          .feature-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #1a2229;font-size:9px}.feature-row:last-child{border-bottom:0}.feature-row span{color:#6f7b84}.feature-row b{color:#dce2e6}
+          .feature-tag{display:inline-block;font-size:7px;padding:3px 5px;border:1px solid #303c45;color:#8d99a2;margin:2px 3px 2px 0}
+          .spark{display:flex;align-items:end;height:48px;gap:4px;margin-top:6px}.spark i{flex:1;background:linear-gradient(#35df92,#174b37);min-height:8px}
+          @media(max-width:800px){.bottom{grid-template-columns:1fr;grid-auto-rows:auto}.feature-card{min-height:145px}.feature-body{padding:10px}}
+          '''
+          if css_marker not in s:
+              s = s.replace('</style>', css + '\n</style>', 1)
+          if html_marker not in s:
+              features = r'''<!-- WORLDGUARD INTELLIGENCE FEATURES -->
+          <section class="feature-card"><div class="feature-head">COUNTRY BRIEFS <em>31 TRACKED</em></div><div class="feature-body"><div class="feature-title">Regional posture overview</div><div><span class="feature-tag">INDIA · STABLE</span><span class="feature-tag">JAPAN · WATCH</span><span class="feature-tag">UKRAINE · HIGH</span><span class="feature-tag">SINGAPORE · STABLE</span></div><div class="feature-row"><span>Highest change</span><b>Eastern Europe</b></div><div class="feature-row"><span>Resilience leader</span><b>Singapore</b></div></div></section>
+          <section class="feature-card"><div class="feature-head">AI ANALYST <em>READY</em></div><div class="feature-body"><div class="feature-title">Ask the situation room</div><div class="feature-muted">Synthetic analyst mode correlates map signals, news, markets and security findings into one demo assessment.</div><button class="btn green full" style="margin-top:9px" onclick="openBrief()">Open AI Analyst</button></div></section>
+          <section class="feature-card"><div class="feature-head">WATCHLIST & ALERTS <em>7 ACTIVE</em></div><div class="feature-body"><div class="feature-row"><span>Red Sea shipping</span><b class="medium">WATCH</b></div><div class="feature-row"><span>Eastern Europe</span><b class="high">ELEVATED</b></div><div class="feature-row"><span>Asia-Pacific cyber</span><b class="medium">WATCH</b></div><div class="feature-row"><span>Critical infrastructure</span><b class="good">STABLE</b></div></div></section>
+          <section class="feature-card"><div class="feature-head">INFRASTRUCTURE CASCADE <em>LOW</em></div><div class="feature-body"><div class="feature-title">No critical cascade detected</div><div class="feature-row"><span>Power grid</span><b class="good">STABLE</b></div><div class="feature-row"><span>Telecom</span><b class="good">STABLE</b></div><div class="feature-row"><span>Data centers</span><b class="medium">WATCH</b></div><div class="feature-row"><span>Transport</span><b class="good">STABLE</b></div></div></section>
+          <section class="feature-card"><div class="feature-head">FINANCE RADAR <em>DEMO</em></div><div class="feature-body"><div class="feature-title">Risk appetite is mixed</div><div class="spark"><i style="height:42%"></i><i style="height:67%"></i><i style="height:50%"></i><i style="height:76%"></i><i style="height:61%"></i><i style="height:84%"></i><i style="height:72%"></i></div><div class="feature-row"><span>Equities</span><b>+1.8%</b></div><div class="feature-row"><span>Gold</span><b>+0.9%</b></div></div></section>
+          <section class="feature-card"><div class="feature-head">DISASTER RADAR <em>DEMO</em></div><div class="feature-body"><div class="feature-row"><span>Earthquake signals</span><b>9</b></div><div class="feature-row"><span>Wildfire zones</span><b class="medium">27</b></div><div class="feature-row"><span>Storm systems</span><b>16</b></div><div class="feature-row"><span>Flood signals</span><b>8</b></div></div></section>
+          <section class="feature-card"><div class="feature-head">AVIATION & MARITIME <em>DEMO</em></div><div class="feature-body"><div class="feature-row"><span>Airports monitored</span><b>120</b></div><div class="feature-row"><span>Shipping chokepoints</span><b>13</b></div><div class="feature-row"><span>Route disruptions</span><b class="medium">4</b></div><div class="feature-row"><span>Major corridors</span><b class="good">STABLE</b></div></div></section>
+          <section class="feature-card"><div class="feature-head">NEWS INTELLIGENCE <em>DEMO FEED</em></div><div class="feature-body"><div class="feature-title">Top correlated signals</div><div class="feature-row"><span>Geopolitics + markets</span><b>HIGH</b></div><div class="feature-row"><span>Infrastructure + weather</span><b>MEDIUM</b></div><div class="feature-row"><span>Cyber + technology</span><b>WATCH</b></div><div class="feature-muted" style="margin-top:6px">All items are simulated for the SIH demonstration.</div></div></section>
+          '''
+              target = '</section></main><footer'
+              if target not in s:
+                  raise SystemExit('Dashboard insertion point not found')
+              s = s.replace(target, '</section>' + features + '</section></main><footer', 1)
           p.write_text(s, encoding='utf-8')
-      - name: Commit optimized layout
+      - name: Commit optimized dashboard
         shell: bash
         run: |
           if git diff --quiet; then exit 0; fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
-          git commit -m 'Reduce map height for compact dashboard'
+          git commit -m 'Add global intelligence feature panels'
           git push
