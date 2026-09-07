@@ -1,51 +1,10 @@
-name: Final dashboard layout
-
+name: Deprecated dashboard workflow
 on:
   workflow_dispatch:
-
 permissions:
-  contents: write
-
+  contents: read
 jobs:
-  layout:
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Apply final layout
-        shell: python
-        run: |
-          from pathlib import Path
-          p=Path('index.html'); s=p.read_text(encoding='utf-8')
-          css='''<style id="worldguard-final-layout">
-          @media (min-width:801px){
-          .app{height:100vh;overflow:hidden}
-          .layout{display:grid!important;grid-template-columns:205px minmax(0,1fr) 300px!important;grid-template-rows:340px 190px 1fr!important;min-height:0!important;overflow:hidden}
-          .maparea{grid-column:2!important;grid-row:1!important;height:340px!important;min-height:0!important}
-          .left{grid-column:1!important;grid-row:1 / span 2!important;max-height:none!important;overflow:auto!important}
-          .right{grid-column:3!important;grid-row:1 / span 2!important;max-height:none!important;overflow:auto!important}
-          .bottom{grid-column:2!important;grid-row:2 / span 2!important;height:auto!important;min-height:0!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:190px 1fr 1fr!important;overflow:hidden!important}
-          .bottom>section{min-width:0!important;min-height:0!important;overflow:hidden!important;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
-          .bottom>section:nth-child(4n){border-right:0}
-          .bottom>section:nth-child(n+5){overflow:auto!important}
-          .bottom .heading{padding:8px 10px}
-          .bottom .news,.bottom .list{overflow:hidden!important}
-          .bottom .feature-card{height:100%!important;min-height:0!important;overflow:auto!important}
-          }
-          @media(max-width:800px){
-          .layout{display:flex!important;flex-direction:column!important;overflow:visible!important}
-          .maparea{order:1!important;height:210px!important;min-height:210px!important}
-          .left{order:2!important}.right{order:3!important}
-          .bottom{order:4!important;height:auto!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:auto!important;overflow:visible!important}
-          .bottom>section{min-height:145px!important;overflow:visible!important;border-right:0!important}
-          }
-          </style>'''
-          if 'id="worldguard-final-layout"' in s:
-            a=s.index('<style id="worldguard-final-layout">'); b=s.index('</style>',a)+8; s=s[:a]+css+s[b:]
-          else: s=s.replace('</head>',css+'</head>',1)
-          p.write_text(s,encoding='utf-8')
-      - name: Commit
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html
-          git diff --cached --quiet || (git commit -m 'Apply final unified dashboard layout' && git push)
+      - run: echo "Deprecated - dashboard is maintained directly in dashboard.html"
