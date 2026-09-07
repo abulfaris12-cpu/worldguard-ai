@@ -1,0 +1,60 @@
+name: Fix WorldGuard globe layout
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-globe-layout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-layout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Make globe the dominant center panel
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('dashboard.html')
+          s = p.read_text(encoding='utf-8')
+
+          marker = '/* WORLDGUARD GLOBE SIZE FIX */'
+          css = r'''/* WORLDGUARD GLOBE SIZE FIX */
+          .main{grid-template-rows:minmax(0,1fr) 285px!important}
+          .globe-panel{min-height:0!important;min-width:0!important}
+          #globe{min-height:0!important}
+          .analytics{min-height:285px!important}
+          @media(min-width:801px){
+            .main{grid-template-rows:minmax(430px,1fr) 285px!important}
+          }
+          @media(min-width:801px) and (max-height:850px){
+            .main{grid-template-rows:minmax(360px,1fr) 245px!important}
+            .analytics{min-height:245px!important}
+          }
+          @media(min-width:801px) and (min-height:851px){
+            .main{grid-template-rows:minmax(500px,1fr) 285px!important}
+          }
+          @media(max-width:800px){
+            .main{grid-template-rows:none!important}
+            .globe-panel{height:500px!important;min-height:500px!important}
+          }
+          '''
+          if marker not in s:
+              s = s.replace('</style>', css + '\n</style>', 1)
+              p.write_text(s, encoding='utf-8')
+
+      - name: Commit layout fix
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dashboard.html
+          git commit -m 'Make globe the dominant center panel'
+          git push
